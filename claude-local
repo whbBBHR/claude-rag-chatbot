@@ -1,0 +1,6 @@
+#!/bin/bash
+# Local Claude command that accesses course materials via RAG system
+
+# Run the Python script from the project directory
+cd "/Users/wayneberry/Documents/ClaudeTorch/ClaudeCode_Class/starting-ragchatbot-codebase"
+python3 claude_local.py "$@"

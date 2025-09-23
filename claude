@@ -1,0 +1,4 @@
+#!/bin/bash
+# Claude CLI wrapper script
+
+python3 claude_chat.py "$@"

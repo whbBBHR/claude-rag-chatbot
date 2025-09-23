@@ -88,7 +88,7 @@ async def get_course_stats():
 @app.on_event("startup")
 async def startup_event():
     """Load initial documents on startup"""
-    docs_path = "../docs"
+    docs_path = "docs"
     if os.path.exists(docs_path):
         print("Loading initial documents...")
         try:
@@ -96,6 +96,8 @@ async def startup_event():
             print(f"Loaded {courses} courses with {chunks} chunks")
         except Exception as e:
             print(f"Error loading documents: {e}")
+    else:
+        print(f"Documents path not found: {docs_path}")
 
 # Serve static files for the frontend
 app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
