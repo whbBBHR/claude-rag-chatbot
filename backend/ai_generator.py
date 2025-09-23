@@ -76,8 +76,15 @@ Provide only the direct answer to what was asked.
             api_params["tools"] = tools
             api_params["tool_choice"] = {"type": "auto"}
         
-        # Get response from Claude
-        response = self.client.messages.create(**api_params)
+        try:
+            # Get response from Claude
+            response = self.client.messages.create(**api_params)
+        except anthropic.AuthenticationError:
+            # Fallback for invalid API key - return mock response
+            return f"⚠️ **Demo Mode**: API key is invalid. Here's what I would search for: '{query}'\n\nPlease set a valid ANTHROPIC_API_KEY in your .env file to get real AI responses about the course materials.\n\n**Available courses:**\n- Advanced Retrieval for AI with Chroma\n- Prompt Compression and Query Optimization\n- Building Towards Computer Use with Anthropic\n- MCP: Build Rich-Context AI Apps with Anthropic"
+        except Exception as e:
+            # Handle other API errors
+            return f"❌ **Error**: {str(e)}\n\nPlease check your API key and network connection."
         
         # Handle tool execution if needed
         if response.stop_reason == "tool_use" and tool_manager:
