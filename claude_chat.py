@@ -7,10 +7,25 @@ Provides command-line access to Claude conversations.
 import sys
 import requests
 import json
+import os
+from pathlib import Path
+
+def load_env():
+    """Load environment variables from .env file"""
+    env_path = Path(__file__).parent / '.env'
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value
 
 def chat_with_claude(message):
     """Send a message to Claude and return the response"""
-    api_key = "YOUR_API_KEY_HERE"  # This will be replaced with actual key during setup
+    load_env()  # Load .env file
+    api_key = os.getenv('ANTHROPIC_API_KEY')
+    if not api_key:
+        return "Error: ANTHROPIC_API_KEY environment variable not set. Please set it in your .env file."
     
     try:
         response = requests.post(
