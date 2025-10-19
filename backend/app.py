@@ -39,6 +39,7 @@ class QueryRequest(BaseModel):
     """Request model for course queries"""
     query: str
     session_id: Optional[str] = None
+    use_planning: Optional[bool] = None
 
 class QueryResponse(BaseModel):
     """Response model for course queries"""
@@ -62,8 +63,8 @@ async def query_documents(request: QueryRequest):
         if not session_id:
             session_id = rag_system.session_manager.create_session()
         
-        # Process query using RAG system
-        answer, sources = rag_system.query(request.query, session_id)
+        # Process query using RAG system with optional planning
+        answer, sources = rag_system.query(request.query, session_id, request.use_planning)
         
         return QueryResponse(
             answer=answer,
@@ -84,6 +85,22 @@ async def get_course_stats():
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/plan-mode")
+async def get_plan_mode():
+    """Get current plan mode status"""
+    return {"plan_mode_enabled": config.PLAN_MODE}
+
+class PlanModeRequest(BaseModel):
+    """Request model for plan mode setting"""
+    enabled: bool
+
+@app.post("/api/plan-mode")
+async def set_plan_mode(request: PlanModeRequest):
+    """Set plan mode status for the session"""
+    # Update the AI generator's plan mode
+    rag_system.ai_generator.plan_mode = request.enabled
+    return {"plan_mode_enabled": request.enabled, "message": f"Plan mode {'enabled' if request.enabled else 'disabled'}"}
 
 @app.on_event("startup")
 async def startup_event():

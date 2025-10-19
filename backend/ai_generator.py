@@ -29,9 +29,10 @@ All responses must be:
 Provide only the direct answer to what was asked.
 """
     
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, plan_mode: bool = False):
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
+        self.plan_mode = plan_mode
         
         # Pre-build base API parameters
         self.base_params = {
@@ -43,7 +44,8 @@ Provide only the direct answer to what was asked.
     def generate_response(self, query: str,
                          conversation_history: Optional[str] = None,
                          tools: Optional[List] = None,
-                         tool_manager=None) -> str:
+                         tool_manager=None,
+                         use_planning: Optional[bool] = None) -> str:
         """
         Generate AI response with optional tool usage and conversation context.
         
@@ -57,12 +59,13 @@ Provide only the direct answer to what was asked.
             Generated response as string
         """
         
-        # Build system content efficiently - avoid string ops when possible
-        system_content = (
-            f"{self.SYSTEM_PROMPT}\n\nPrevious conversation:\n{conversation_history}"
-            if conversation_history 
-            else self.SYSTEM_PROMPT
-        )
+        # Determine if planning should be used
+        planning_enabled = use_planning if use_planning is not None else self.plan_mode
+        
+        # Build system content
+        system_content = self.SYSTEM_PROMPT
+        if conversation_history:
+            system_content = f"{system_content}\n\nPrevious conversation:\n{conversation_history}"
         
         # Prepare API call parameters efficiently
         api_params = {
@@ -75,6 +78,26 @@ Provide only the direct answer to what was asked.
         if tools:
             api_params["tools"] = tools
             api_params["tool_choice"] = {"type": "auto"}
+        
+        # Enable enhanced reasoning for planning mode
+        if planning_enabled:
+            # Increase temperature slightly for more creative reasoning
+            api_params["temperature"] = 0.3
+            api_params["max_tokens"] = 1500  # Allow more tokens for detailed reasoning
+            
+            # For newer Claude models, we can request step-by-step reasoning
+            enhanced_query = f"""Think through this step-by-step before answering:
+
+{query}
+
+Please show your reasoning process including:
+1. What the question is asking
+2. What information you need to find
+3. Your approach to finding it
+4. Your analysis of the results
+5. Your final answer"""
+            
+            api_params["messages"] = [{"role": "user", "content": enhanced_query}]
         
         try:
             # Get response from Claude

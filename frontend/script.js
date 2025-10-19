@@ -1,5 +1,5 @@
-// API base URL - use relative path to work from any host
-const API_URL = '/api';
+// API base URL - point to backend server
+const API_URL = 'http://localhost:8000';
 
 // Global state
 let currentSessionId = null;
@@ -60,7 +60,13 @@ async function sendMessage() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-        const response = await fetch(`${API_URL}/query`, {
+        console.log('Making request to:', `${API_URL}/api/query`);
+        console.log('Request body:', JSON.stringify({
+            query: query,
+            session_id: currentSessionId
+        }));
+        
+        const response = await fetch(`${API_URL}/api/query`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,9 +77,15 @@ async function sendMessage() {
             })
         });
 
-        if (!response.ok) throw new Error('Query failed');
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`Query failed: ${response.status} - ${errorText}`);
+        }
 
         const data = await response.json();
+        console.log('Response data:', data);
         
         // Update session ID if new
         if (!currentSessionId) {
@@ -85,6 +97,7 @@ async function sendMessage() {
         addMessage(data.answer, 'assistant', data.sources);
 
     } catch (error) {
+        console.error('Query error:', error);
         // Replace loading message with error
         loadingMessage.remove();
         addMessage(`Error: ${error.message}`, 'assistant');
@@ -156,7 +169,7 @@ async function createNewSession() {
 async function loadCourseStats() {
     try {
         console.log('Loading course stats...');
-        const response = await fetch(`${API_URL}/courses`);
+        const response = await fetch(`${API_URL}/api/courses`);
         if (!response.ok) throw new Error('Failed to load course stats');
         
         const data = await response.json();

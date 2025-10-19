@@ -1,0 +1,3 @@
+[console_scripts]
+ragchatbot-cli = backend.cli:main
+ragchatbot-server = backend.app:main

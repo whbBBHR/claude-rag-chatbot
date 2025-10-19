@@ -1,0 +1,12 @@
+INFO:     Started server process [27503]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+Loading initial documents...
+Course already exists: Advanced Retrieval for AI with Chroma - skipping
+Course already exists: Prompt Compression and Query Optimization - skipping
+Course already exists: Building Towards Computer Use with Anthropic - skipping
+Course already exists: MCP: Build Rich-Context AI Apps with Anthropic - skipping
+Loaded 0 courses with 0 chunks

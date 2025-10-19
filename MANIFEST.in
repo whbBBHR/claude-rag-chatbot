@@ -1,0 +1,13 @@
+include README.md
+include LICENSE
+include requirements.txt
+include .env.example
+recursive-include backend *.py
+recursive-include frontend *.html *.css *.js
+recursive-include docs *.txt *.md
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+exclude .gitignore
+exclude server.log
+exclude nohup.out
